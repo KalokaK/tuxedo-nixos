@@ -124,6 +124,8 @@ stdenv.mkDerivation rec {
     # We need to tell npm where to find node or `node-gyp` will try to download it.
     # This also _needs_ to be lowercase or `npm` won't detect it
     export npm_config_nodedir=${nodejs}
+    whereis node-gyp
+    which node-gyp
     npm run build-native   # Builds to ./build/Release/TuxedoIOAPI.node
 
     npm run build-ng-prod
