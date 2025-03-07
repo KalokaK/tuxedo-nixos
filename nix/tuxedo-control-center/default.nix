@@ -150,6 +150,7 @@ stdenv.mkDerivation rec {
     # Install `tccd`
     mkdir -p $out/data/service
     cp ./build/Release/TuxedoIOAPI.node $out/data/service/TuxedoIOAPI.node
+    cp ./build/Release/TuxedoIOAPI.node $out/service-app/native-lib/TuxedoIOAPI.node
     makeWrapper ${nodejs}/bin/node $out/data/service/tccd \
                 --add-flags "$out/service-app/service-app/main.js" \
                 --prefix NODE_PATH : $out/data/service \
