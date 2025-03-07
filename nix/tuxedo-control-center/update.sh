@@ -28,7 +28,7 @@ done
 # (see the alias there for an explanation)
 node2nix \
  --development \
- --nodejs-18 \
+ --nodejs-14 \
  --input "$WORKDIR/package.json" \
  --lock "$WORKDIR/package-lock.json" \
  --output node-packages.nix \

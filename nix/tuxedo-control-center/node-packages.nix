@@ -13421,7 +13421,7 @@ let
     name = "tuxedo-control-center";
     packageName = "tuxedo-control-center";
     version = "2.1.16";
-    src = ../../../../../../tmp/nix-shell-12949-0/tmp.z9bAstkIyM;
+    src = ../../../../../../tmp/nix-shell-11191-0/tmp.GBj1IfbVia;
     dependencies = [
       sources."7zip-bin-5.0.3"
       (sources."@angular-devkit/architect-0.1002.4" // {
