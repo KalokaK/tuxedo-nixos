@@ -8664,15 +8664,15 @@ let
         sha512 = "PPmu8eEeG9saEUvI97fm4OYxXVB6bFvyNTyiUOBichBpFG8A1Ljw3bY62+5oOjDEMHRnd0Y7HQ+x7uzxOzC6JA==";
       };
     };
-    "node-gyp-9.4.1" = {
-      name = "node-gyp";
-      packageName = "node-gyp";
-      version = "9.4.1";
-      src = fetchurl {
-        url = "https://registry.npmjs.org/node-gyp/-/node-gyp-9.4.1.tgz";
-        sha512 = "OQkWKbjQKbGkMf/xqI1jjy3oCTgMKJac58G2+bjZb3fza6gW2YrCSdMQYaoTb70crvE//Gngr4f0AgVHmqHvBQ==";
-      };
-    };
+    # "node-gyp-9.4.1" = {
+    #   name = "node-gyp";
+    #   packageName = "node-gyp";
+    #   version = "9.4.1";
+    #   src = fetchurl {
+    #     url = "https://registry.npmjs.org/node-gyp/-/node-gyp-9.4.1.tgz";
+    #     sha512 = "OQkWKbjQKbGkMf/xqI1jjy3oCTgMKJac58G2+bjZb3fza6gW2YrCSdMQYaoTb70crvE//Gngr4f0AgVHmqHvBQ==";
+    #   };
+    # };
     "node-libs-browser-2.2.1" = {
       name = "node-libs-browser";
       packageName = "node-libs-browser";
