@@ -1,6 +1,6 @@
-{ pkgs, lib, stdenv, copyDesktopItems
-, python3, udev
-, makeWrapper, nodejs-14_x, electron_34, fetchFromGitHub
+{ pkgs, lib, stdenv, copyDesktopItems,
+  python3, udev,
+  makeWrapper, nodejs-14_x, electron_34, fetchFromGitHub
 }:
 
 let
@@ -77,7 +77,7 @@ stdenv.mkDerivation rec {
 
     # For node-gyp
     python3
-    nodePackages.node-gyp
+    pkgs.nodePackages.node-gyp
   ];
 
   # These are installed in the right place via copyDesktopItems.
