@@ -1,12 +1,10 @@
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, tuxedo-control-center, ... }:
 
 with lib;
 
 let
   cfg = config.hardware.tuxedo-control-center;
   tuxedo-drivers = config.boot.kernelPackages.tuxedo-drivers;
-
-  tuxedo-control-center = pkgs.callPackage ./tuxedo-control-center {};
 in
 {
   options.hardware.tuxedo-control-center = {

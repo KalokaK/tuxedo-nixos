@@ -36,6 +36,9 @@
         };
       }).pkgs.callPackage ./nix/tuxedo-control-center { nodejs-14_x = old-nixpkgs.legacyPackages.${system}.nodejs-14_x; };
 
-    nixosModules.default = import ./nix/module.nix;
+    nixosModules.default = {config, pkgs, ...}: {
+      _module.args.tuxedo-control-center = self.packages.${system}.default;
+      imports = [ ./nix/module.nix ];
+    };
   };
 }
