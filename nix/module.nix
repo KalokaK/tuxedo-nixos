@@ -4,7 +4,7 @@ with lib;
 
 let
   cfg = config.hardware.tuxedo-control-center;
-  tuxedo-keyboard = config.boot.kernelPackages.tuxedo-keyboard;
+  tuxedo-drivers = config.boot.kernelPackages.tuxedo-drivers;
 
   tuxedo-control-center = pkgs.callPackage ./tuxedo-control-center {};
 in
@@ -30,7 +30,7 @@ in
   };
 
   config = mkIf cfg.enable {
-    hardware.tuxedo-keyboard.enable = true;
+    hardware.tuxedo-drivers.enable = true;
     boot.kernelModules = [
       # Tuxedo Control Center has a requirement on the minimum version
       # of "tuxedo_io" kernel module.
@@ -38,11 +38,11 @@ in
       # "src/native-lib/tuxedo_io_lib/tuxedo_io_ioctl.h" file of tuxedo-control-center
       # (i.e. the #define of MOD_API_MIN_VERSION).
       # The respective version of the module itself is in the 
-      # "src/tuxedo_io/tuxedo_io.c" file of tuxedo-keyboard
+      # "src/tuxedo_io/tuxedo_io.c" file of tuxedo-drivers
       # (i.e. the #define of MODULE_VERSION).
       (warnIf
-        ((builtins.compareVersions tuxedo-keyboard.version "3.1.2") < 0)
-        "Tuxedo Control Center requires at least version 3.1.2 of tuxedo-keyboard (0.2.6 tuxedo_io kernel module); current version is ${tuxedo-keyboard.version}"
+        ((builtins.compareVersions tuxedo-drivers.version "4.12.1") < 0)
+        "Tuxedo Control Center requires at least version 4.12.1 of tuxedo-drivers; current version is ${tuxedo-drivers.version}"
         "tuxedo_io")
     ];
 
@@ -51,12 +51,12 @@ in
 
     # See https://github.com/tuxedocomputers/tuxedo-control-center/issues/148
     nixpkgs.config.permittedInsecurePackages = [
-      "electron-13.6.9"
-      "nodejs-14.21.3"
-      "openssl-1.1.1t"
-      "openssl-1.1.1u"
-      "openssl-1.1.1v"
-      "openssl-1.1.1w"
+      # "electron-13.6.9"
+      # "nodejs-14.21.3"
+      # "openssl-1.1.1t"
+      # "openssl-1.1.1u"
+      # "openssl-1.1.1v"
+      # "openssl-1.1.1w"
     ];
 
     systemd.services.tccd = {

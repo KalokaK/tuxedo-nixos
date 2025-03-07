@@ -1,13 +1,13 @@
 { pkgs, lib, stdenv, copyDesktopItems
 , python3, udev
-, makeWrapper, nodejs-14_x, electron_13, fetchFromGitHub
+, makeWrapper, nodejs-14_x, electron_34, fetchFromGitHub
 }:
 
 let
   ## Update Instructions
   #
   # see ./README.md
-  version = "2.0.7";
+  version = "2.1.16";
 
   # keep in sync with update.sh!
   # otherwise the format of package.json does not mach the format used by the 
@@ -26,7 +26,7 @@ let
       owner = "tuxedocomputers";
       repo = "tuxedo-control-center";
       rev = "v${version}";
-      sha256 = "GSG8pf+mBt+lEDt667gyUa1rYyto6MRRsHj/fl1ef8Y=";
+      sha256 = "odGx1S6F5UVK73QjMI1np9Fx/QawRA+jnK/ZTzV6joI=";
     };
 
     preRebuild = ''

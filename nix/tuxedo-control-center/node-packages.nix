@@ -1831,13 +1831,13 @@ let
         sha512 = "e0L/HNe6qkQ7H19kTlRRqUibEAwDK5AFk6y3PtMsuut2VAH6+Q4xZml1tNDJD7kSAyqmbG/K08K5WEJYtUrSlQ==";
       };
     };
-    "agentkeepalive-4.3.0" = {
+    "agentkeepalive-4.5.0" = {
       name = "agentkeepalive";
       packageName = "agentkeepalive";
-      version = "4.3.0";
+      version = "4.5.0";
       src = fetchurl {
-        url = "https://registry.npmjs.org/agentkeepalive/-/agentkeepalive-4.3.0.tgz";
-        sha512 = "7Epl1Blf4Sy37j4v9f9FjICCh4+KAQOyXgHEwlyBiAQLbhKdq/i2QQU3amQalS/wPhdPzDXPL5DMR5bkn+YeWg==";
+        url = "https://registry.npmjs.org/agentkeepalive/-/agentkeepalive-4.5.0.tgz";
+        sha512 = "5GG/5IbQQpC9FpkRGsSvZI5QYeSCzlJHdpBQntCsuTOxhKD8lqKhrleg2Yi7yvMIf82Ycmmqln9U8V9qwEiJew==";
       };
     };
     "aggregate-error-3.1.0" = {
@@ -5016,6 +5016,15 @@ let
       src = fetchurl {
         url = "https://registry.npmjs.org/expand-template/-/expand-template-2.0.3.tgz";
         sha512 = "XYfuKMvj4O35f/pOXLObndIRvyQ+/+6AhODh+OKWj9S9498pHHn/IMszH+gt0fBCRWMNfk1ZSp5x3AifmnI2vg==";
+      };
+    };
+    "exponential-backoff-3.1.1" = {
+      name = "exponential-backoff";
+      packageName = "exponential-backoff";
+      version = "3.1.1";
+      src = fetchurl {
+        url = "https://registry.npmjs.org/exponential-backoff/-/exponential-backoff-3.1.1.tgz";
+        sha512 = "dX7e/LHVJ6W3DE1MHWi9S1EYzDESENfLrYohG2G++ovZrYOkm4Knwa0mc1cn84xJOR4KEU0WSchhLbd0UklbHw==";
       };
     };
     "express-4.18.2" = {
@@ -8564,13 +8573,13 @@ let
         sha512 = "tPrhHSS2DfVyipXQ0gykOPc8zFNnj2b7sAebUVty392vHnEGYCwsP6YbFfpr1iXu4yBSRm4Gt5lffR5w0uyYSw==";
       };
     };
-    "ngx-color-picker-10.1.0" = {
+    "ngx-color-picker-11.0.0" = {
       name = "ngx-color-picker";
       packageName = "ngx-color-picker";
-      version = "10.1.0";
+      version = "11.0.0";
       src = fetchurl {
-        url = "https://registry.npmjs.org/ngx-color-picker/-/ngx-color-picker-10.1.0.tgz";
-        sha512 = "Q3BILkQP+l+dcX0joe7+xuHDKydhGnG09sUG1FmlLZFYIEX4+AQqHULh+hUAci8kZlLZuOG+mB2Uq54QYadItw==";
+        url = "https://registry.npmjs.org/ngx-color-picker/-/ngx-color-picker-11.0.0.tgz";
+        sha512 = "HyiFNPYLrCyYbFpLvZJaHC43RhjfDdFDij4pnvk9R46iH1scVtO6f2ibBgxRwBKKsT94KYvOH8wF8OrvztWdEw==";
       };
     };
     "ngx-electron-2.2.0" = {
@@ -8618,14 +8627,14 @@ let
         sha512 = "ibPK3iA+vaY1eEjESkQkM0BbCqFOaZMiXRTtdB0u7b4djtY6JnsjvPdUHVMg6xQt3B8fpTTWHI9A+ADjM9frzg==";
       };
     };
-    "node-ble-git+https://github.com/tuxedoxt/node-ble.git#687b96343402f7b34b967d34959148ed9247c9a7" = {
+    "node-ble-git+https://github.com/tuxedoxt/node-ble.git#4b7cb1cbf62196894d9e15ef47dbb4821b63ec78" = {
       name = "node-ble";
       packageName = "node-ble";
-      version = "1.7.0";
+      version = "1.9.0";
       src = fetchgit {
         url = "https://github.com/tuxedoxt/node-ble.git";
-        rev = "687b96343402f7b34b967d34959148ed9247c9a7";
-        sha256 = "db89955d35508aa8ca413965cca4bab3e43817ae620c1288e37774d11578a28d";
+        rev = "4b7cb1cbf62196894d9e15ef47dbb4821b63ec78";
+        sha256 = "1ffbc91d4da4e7262d8fdf7d7c3704e96fa05ca174dcfd22355a6f4983acaca7";
       };
     };
     "node-fetch-2.6.9" = {
@@ -8655,13 +8664,13 @@ let
         sha512 = "PPmu8eEeG9saEUvI97fm4OYxXVB6bFvyNTyiUOBichBpFG8A1Ljw3bY62+5oOjDEMHRnd0Y7HQ+x7uzxOzC6JA==";
       };
     };
-    "node-gyp-9.3.1" = {
+    "node-gyp-9.4.1" = {
       name = "node-gyp";
       packageName = "node-gyp";
-      version = "9.3.1";
+      version = "9.4.1";
       src = fetchurl {
-        url = "https://registry.npmjs.org/node-gyp/-/node-gyp-9.3.1.tgz";
-        sha512 = "4Q16ZCqq3g8awk6UplT7AuxQ35XN4R/yf/+wSAwcBUAjg7l58RTactWaP8fIDTi0FzI7YcVLujwExakZlfWkXg==";
+        url = "https://registry.npmjs.org/node-gyp/-/node-gyp-9.4.1.tgz";
+        sha512 = "OQkWKbjQKbGkMf/xqI1jjy3oCTgMKJac58G2+bjZb3fza6gW2YrCSdMQYaoTb70crvE//Gngr4f0AgVHmqHvBQ==";
       };
     };
     "node-libs-browser-2.2.1" = {
@@ -10984,6 +10993,15 @@ let
       src = fetchurl {
         url = "https://registry.npmjs.org/semver/-/semver-7.3.8.tgz";
         sha512 = "NB1ctGL5rlHrPJtFDVIVzTyQylMLu9N9VICA6HSFJo8MCGVTMW6gfpicwKmmK/dAjTOrqu5l63JJOpDSrAis3A==";
+      };
+    };
+    "semver-7.5.4" = {
+      name = "semver";
+      packageName = "semver";
+      version = "7.5.4";
+      src = fetchurl {
+        url = "https://registry.npmjs.org/semver/-/semver-7.5.4.tgz";
+        sha512 = "1bCSESV6Pv+i21Hvpxp3Dx+pSD8lIPt8uVjRrxAUt/nbswYc+tK6Y2btiULjd4+fnq15PX+nqQDC7Oft7WkwcA==";
       };
     };
     "semver-compare-1.0.0" = {
@@ -13402,8 +13420,8 @@ let
   args = {
     name = "tuxedo-control-center";
     packageName = "tuxedo-control-center";
-    version = "2.0.7";
-    src = ../../../../../../../../run/user/1000/tmp.CJzOrm7xyz;
+    version = "2.1.16";
+    src = ../../../../../../tmp/nix-shell-11191-0/tmp.GBj1IfbVia;
     dependencies = [
       sources."7zip-bin-5.0.3"
       (sources."@angular-devkit/architect-0.1002.4" // {
@@ -13625,7 +13643,7 @@ let
       (sources."@npmcli/fs-2.1.2" // {
         dependencies = [
           sources."lru-cache-6.0.0"
-          sources."semver-7.3.8"
+          sources."semver-7.5.4"
         ];
       })
       sources."@npmcli/move-file-2.0.1"
@@ -13692,11 +13710,7 @@ let
       sources."adm-zip-0.5.10"
       sources."after-0.8.2"
       sources."agent-base-6.0.2"
-      (sources."agentkeepalive-4.3.0" // {
-        dependencies = [
-          sources."depd-2.0.0"
-        ];
-      })
+      sources."agentkeepalive-4.5.0"
       sources."aggregate-error-3.1.0"
       sources."ajv-6.12.4"
       sources."ajv-errors-1.0.1"
@@ -14250,6 +14264,7 @@ let
         ];
       })
       sources."expand-template-2.0.3"
+      sources."exponential-backoff-3.1.1"
       (sources."express-4.18.2" // {
         dependencies = [
           sources."array-flatten-1.1.1"
@@ -14825,7 +14840,7 @@ let
       sources."neo-async-2.6.2"
       sources."next-tick-1.1.0"
       sources."ng2-charts-2.4.3"
-      sources."ngx-color-picker-10.1.0"
+      sources."ngx-color-picker-11.0.0"
       (sources."ngx-electron-2.2.0" // {
         dependencies = [
           sources."tslib-1.14.1"
@@ -14840,7 +14855,7 @@ let
         ];
       })
       sources."node-addon-api-1.7.2"
-      (sources."node-ble-git+https://github.com/tuxedoxt/node-ble.git#687b96343402f7b34b967d34959148ed9247c9a7" // {
+      (sources."node-ble-git+https://github.com/tuxedoxt/node-ble.git#4b7cb1cbf62196894d9e15ef47dbb4821b63ec78" // {
         dependencies = [
           sources."dbus-next-git+https://github.com/tuxedoxt/node-dbus-next.git#e875f304780e0d8108dbe1d7e7bdcf6ba9e9313f"
         ];
@@ -14854,11 +14869,11 @@ let
       })
       sources."node-fetch-npm-2.0.4"
       sources."node-forge-0.10.0"
-      (sources."node-gyp-9.3.1" // {
+      (sources."node-gyp-9.4.1" // {
         dependencies = [
           sources."glob-7.2.3"
           sources."lru-cache-6.0.0"
-          sources."semver-7.3.8"
+          sources."semver-7.5.4"
         ];
       })
       (sources."node-libs-browser-2.2.1" // {
@@ -16095,6 +16110,7 @@ let
     ];
     buildInputs = globalBuildInputs;
     meta = {
+      description = "TUXEDO Control Center Application";
       homepage = "https://tuxedocomputers.com";
       license = "GPL-3.0";
     };
