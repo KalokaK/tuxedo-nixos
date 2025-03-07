@@ -77,6 +77,7 @@ stdenv.mkDerivation rec {
 
     # For node-gyp
     python3
+    nodePackages.node-gyp
   ];
 
   # These are installed in the right place via copyDesktopItems.
