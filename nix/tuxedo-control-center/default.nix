@@ -1,5 +1,5 @@
 { pkgs, lib, stdenv, copyDesktopItems,
-  python3, udev,
+  python3, udev, node-gyp,
   makeWrapper, nodejs-14_x, electron_34, fetchFromGitHub
 }:
 
@@ -77,7 +77,7 @@ stdenv.mkDerivation rec {
 
     # For node-gyp
     python3
-    pkgs.nodePackages.node-gyp
+    node-gyp
   ];
 
   # These are installed in the right place via copyDesktopItems.
@@ -107,7 +107,7 @@ stdenv.mkDerivation rec {
     # We already have `node_modules` in the current directory but we
     # need it's binaries on `PATH` so we can use them!
     export PATH="./node_modules/.bin:$PATH"
-
+    # ${pkgs.which}/bin/which node-gyp
     # Prevent npm from checking for updates
     export NO_UPDATE_NOTIFIER=true
 
@@ -124,8 +124,9 @@ stdenv.mkDerivation rec {
     # We need to tell npm where to find node or `node-gyp` will try to download it.
     # This also _needs_ to be lowercase or `npm` won't detect it
     export npm_config_nodedir=${nodejs}
-    which node-gyp
-    npm run build-native   # Builds to ./build/Release/TuxedoIOAPI.node
+    # ${pkgs.which}/bin/which node-gyp
+    # ${pkgs.nodePackages.node-gyp}/bin/
+    ${node-gyp}/bin/node-gyp configure && ${node-gyp}/bin/node-gyp rebuild # Builds to ./build/Release/TuxedoIOAPI.node
 
     npm run build-ng-prod
 
