@@ -1,6 +1,8 @@
 { pkgs, lib, stdenv, copyDesktopItems,
   python3, udev, node-gyp,
-  makeWrapper, nodejs-14_x, electron_34, fetchFromGitHub
+  makeWrapper, nodejs-14_x, electron_34, fetchFromGitHub,
+  glibc,
+  gcc
 }:
 
 let
@@ -68,12 +70,15 @@ stdenv.mkDerivation rec {
 
   nativeBuildInputs = [
     copyDesktopItems
+    glibc
+    gcc
   ];
 
   buildInputs = [
     nodejs
     makeWrapper
     udev
+    extensionsEnv
 
     # For node-gyp
     python3
