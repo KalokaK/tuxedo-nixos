@@ -2,4 +2,4 @@
     which
     gawk
     procps
-  ]) ++ lib.optionals (nvidiaPackage != null) nvidiaPackage)
+  ]) ++ lib.optional (nvidiaPackage != null) nvidiaPackage)

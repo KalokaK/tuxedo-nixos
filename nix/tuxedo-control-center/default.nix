@@ -16,6 +16,7 @@ let
   #   > npm ERR! code ENOTCACHED
   #   > npm ERR! request to https://registry.npmjs.org/node-ble failed: cache mode is 'only-if-cached' but no cached response is available.
   nodejs = nodejs-14_x;
+  builtins.trace 
 
   runtime-dep-path = lib.makeBinPath ((import ../runtime-dep-pkgs.nix) { inherit pkgs lib nvidiaPackage; } );
 

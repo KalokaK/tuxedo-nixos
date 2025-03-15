@@ -5,9 +5,9 @@ with lib;
 let
   cfg = config.hardware.tuxedo-control-center;
   tuxedo-drivers = config.boot.kernelPackages.tuxedo-drivers;
-  tuxedoPkg = if lib.elem "nvidia" config.services.xserver.videoDrivers then tuxedo-control-center else tuxedo-control-center.override {
+  tuxedoPkg = if lib.elem "nvidia" config.services.xserver.videoDrivers then tuxedo-control-center.override {
     nvidiaPackage = config.hardware.nvidia.package.bin;
-  };
+  } else tuxedo-control-center;
   runtime-deps = ((import ./runtime-dep-pkgs.nix) { 
     inherit lib pkgs; 
     nvidiaPackage = if lib.elem "nvidia" config.services.xserver.videoDrivers then config.hardware.nvidia.package.bin else null;
