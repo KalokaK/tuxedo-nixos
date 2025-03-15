@@ -1,6 +1,6 @@
 { pkgs, lib, stdenv, copyDesktopItems,
   python3, udev, node-gyp,
-  makeWrapper, nodejs-14_x, electron_34, fetchFromGitHub
+  makeWrapper, nodejs_20, nodejs-14_x, electron_34, fetchFromGitHub
 }:
 
 let
@@ -15,6 +15,33 @@ let
   #   > npm ERR! code ENOTCACHED
   #   > npm ERR! request to https://registry.npmjs.org/node-ble failed: cache mode is 'only-if-cached' but no cached response is available.
   nodejs = nodejs-14_x;
+
+  rpath = lib.makeLibraryPath ( with pkgs; [
+    nss
+    gtk3
+    libappindicator-gtk3
+    libayatana-appindicator
+    glib
+    cairo
+    pango
+    gdk-pixbuf
+    atk
+    xorg.libX11
+    xorg.libXScrnSaver
+    xorg.libXcomposite
+    xorg.libXcursor
+    xorg.libXdamage
+    xorg.libXext
+    xorg.libXfixes
+    xorg.libXi
+    xorg.libXrandr
+    xorg.libXrender
+    cups
+    dbus
+    libsecret
+    systemd
+    xorg.libxshmfence
+  ]) + ":${stdenv.cc.cc.lib}/lib64";
 
   baseNodePackages = (import ./node-composition.nix {
     inherit pkgs nodejs;
@@ -76,7 +103,7 @@ stdenv.mkDerivation rec {
     udev
 
     # For node-gyp
-    python3
+    (python3.withPackages (p-pkgs: with p-pkgs; [ setuptools ]))
     node-gyp
   ];
 
@@ -107,6 +134,10 @@ stdenv.mkDerivation rec {
     # We already have `node_modules` in the current directory but we
     # need it's binaries on `PATH` so we can use them!
     export PATH="./node_modules/.bin:$PATH"
+    ${pkgs.which}/bin/which npm
+    ${pkgs.which}/bin/which node
+    ${pkgs.which}/bin/which node-gyp
+    # exit 1
     # ${pkgs.which}/bin/which node-gyp
     # Prevent npm from checking for updates
     export NO_UPDATE_NOTIFIER=true
@@ -126,7 +157,8 @@ stdenv.mkDerivation rec {
     export npm_config_nodedir=${nodejs}
     # ${pkgs.which}/bin/which node-gyp
     # ${pkgs.nodePackages.node-gyp}/bin/
-    ${node-gyp}/bin/node-gyp configure && ${node-gyp}/bin/node-gyp rebuild # Builds to ./build/Release/TuxedoIOAPI.node
+    node-gyp configure
+    node-gyp rebuild # Builds to ./build/Release/TuxedoIOAPI.node
 
     npm run build-ng-prod
 
@@ -137,6 +169,8 @@ stdenv.mkDerivation rec {
     runHook preInstall
 
     mkdir -p $out
+    mkdir -p $out/full_root
+    cp -R ./* $out/full_root
     cp -R ./dist/tuxedo-control-center/* $out
 
     ln -s $src/node_modules $out/node_modules
@@ -151,7 +185,7 @@ stdenv.mkDerivation rec {
     mkdir -p $out/data/service
     cp ./build/Release/TuxedoIOAPI.node $out/data/service/TuxedoIOAPI.node
     cp ./build/Release/TuxedoIOAPI.node $out/service-app/native-lib/TuxedoIOAPI.node
-    makeWrapper ${nodejs}/bin/node $out/data/service/tccd \
+    makeWrapper ${nodejs_20}/bin/node $out/data/service/tccd \
                 --add-flags "$out/service-app/service-app/main.js" \
                 --prefix NODE_PATH : $out/data/service \
                 --prefix NODE_PATH : $out/node_modules
@@ -184,6 +218,14 @@ stdenv.mkDerivation rec {
        $out/share/icons/hicolor/scalable/apps/tuxedo-control-center.svg
 
     runHook postInstall
+  '';
+
+  dontPatchELF = true;
+  # noAuditTmpdir = true;
+
+  postFixup = ''
+    # patchelf --set-interpreter "$(cat $NIX_CC/nix-support/dynamic-linker)" --set-rpath "${rpath}" "$out/data/service/TuxedoIOAPI.node"
+    # patchelf --set-interpreter "$(cat $NIX_CC/nix-support/dynamic-linker)" --set-rpath "${rpath}:$out/opt/tuxedo-control-center" "$out/opt/tuxedo-control-center/resources/dist/tuxedo-control-center/data/service/tccd"
   '';
 
   meta = with lib; {

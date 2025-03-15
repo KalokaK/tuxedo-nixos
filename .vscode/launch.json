@@ -1,0 +1,25 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+      {
+        "name": "Attach to Main Process",
+        "type": "node",
+        "request": "attach",
+        "port": 9223, // Match `--inspect=9223` from the Electron command
+        "cwd": "${workspaceRoot}/result/full_root",
+        "sourceMaps": true,
+        "outFiles": ["${workspaceRoot}/result/full_root/dist/**/*.js"]
+      },
+      {
+        "name": "Attach to Renderer Process",
+        "type": "chrome",
+        "request": "attach",
+        "port": 9222, // Match `--remote-debugging-port=9222`
+        "webRoot": "${workspaceRoot}/result/full_root/dist",
+        "sourceMaps": true,
+        "sourceMapPathOverrides": {
+          "webpack:///./*": "${workspaceRoot}/result/full_root/*"
+        }
+      }
+    ]
+  }
