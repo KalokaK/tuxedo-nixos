@@ -5,7 +5,7 @@ with lib;
 let
   cfg = config.hardware.tuxedo-control-center;
   tuxedo-drivers = config.boot.kernelPackages.tuxedo-drivers;
-  tuxedoPkg = if config.hardware.nvidia.enable then tuxedo-control-center else tuxedo-control-center.override {
+  tuxedoPkg = if lib.elem "nvidia" config.services.xserver.videoDrivers then tuxedo-control-center else tuxedo-control-center.override {
     nvidiaPackage = config.hardware.nvidia.package.bin;
   };
 in
