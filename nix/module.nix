@@ -75,7 +75,7 @@ in
     ];
 
     systemd.services.tccd = {
-      path = [ cfg.package ] ++ runtime-deps;
+      path = [ cfg.package ];
 
       description = "Tuxedo Control Center Service";
 
