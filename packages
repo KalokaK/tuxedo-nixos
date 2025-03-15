@@ -1,0 +1,137 @@
+Finding Nix packages for the following libraries:
+/lib64/ld-linux-x86-64.so.2
+libasound.so.2
+libatk-1.0.so.0
+libatk-bridge-2.0.so.0
+libatspi.so.0
+libcairo.so.2
+libc.so.6
+libcups.so.2
+libdbus-1.so.3
+libdl.so.2
+libdrm.so.2
+libexpat.so.1
+libffmpeg.so
+libgbm.so.1
+libgcc_s.so.1
+libgdk-3.so.0
+libgdk_pixbuf-2.0.so.0
+libgio-2.0.so.0
+libglib-2.0.so.0
+libgobject-2.0.so.0
+libgtk-3.so.0
+libm.so.6
+libnspr4.so
+libnss3.so
+libnssutil3.so
+libpango-1.0.so.0
+libpthread.so.0
+libsmime3.so
+libX11.so.6
+libxcb.so.1
+libXcomposite.so.1
+libXdamage.so.1
+libXext.so.6
+libXfixes.so.3
+libxkbcommon.so.0
+libXrandr.so.2
+libxshmfence.so.1
+linux-vdso.so.1
+
+Matching Nix packages:
+polar-bookshelf -> libffmpeg.so 
+cairo -> libcairo.so.2 
+alsa-lib-with-plugins -> libasound.so.2 
+nspr -> libnspr4.so 
+remarkable2-toolchain -> libcairo.so.2 libc.so.6 libcups.so.2 libdbus-1.so.3 libdl.so.2 libexpat.so.1 libgcc_s.so.1 libgio-2.0.so.0 libglib-2.0.so.0 libgobject-2.0.so.0 libm.so.6 libpthread.so.0 libX11.so.6 libxcb.so.1 
+xorg.libXcomposite -> libXcomposite.so.1 
+nwjs -> libffmpeg.so 
+zotero -> libnspr4.so libnss3.so libnssutil3.so libsmime3.so 
+nss_latest -> libnss3.so libnssutil3.so libsmime3.so 
+keybase-gui -> libffmpeg.so 
+nx-libs -> libX11.so.6 
+glibc -> libc.so.6 libdl.so.2 libm.so.6 libpthread.so.0 
+premid -> libffmpeg.so 
+nextcloud-talk-desktop -> libffmpeg.so 
+trilium-desktop -> libffmpeg.so 
+julia-lts -> libgcc_s.so.1 
+alsa-lib -> libasound.so.2 
+gdk-pixbuf -> libgdk_pixbuf-2.0.so.0 
+julia_110 -> libgcc_s.so.1 libpthread.so.0 
+xorg.libxshmfence -> libxshmfence.so.1 
+remarkable-toolchain -> libcairo.so.2 libc.so.6 libcups.so.2 libdbus-1.so.3 libdl.so.2 libexpat.so.1 libgcc_s.so.1 libgio-2.0.so.0 libglib-2.0.so.0 libgobject-2.0.so.0 libm.so.6 libpthread.so.0 libX11.so.6 libxcb.so.1 
+popcorntime -> libffmpeg.so 
+at-spi2-atk -> libatk-1.0.so.0 libatk-bridge-2.0.so.0 libatspi.so.0 
+julia -> libgcc_s.so.1 libpthread.so.0 
+qmmp -> libffmpeg.so 
+hyperhdr -> libasound.so.2 libdbus-1.so.3 libgio-2.0.so.0 libgobject-2.0.so.0 libX11.so.6 libxcb.so.1 libXext.so.6 
+glibc.debug -> libc.so.6 libdl.so.2 libm.so.6 libpthread.so.0 
+libxkbcommon -> libxkbcommon.so.0 
+dbus.lib -> libdbus-1.so.3 
+rigsofrods-bin -> libXext.so.6 
+electron-bin -> libffmpeg.so 
+rubyPackages_3_2.pwntools -> libc.so.6 
+electron_34 -> libffmpeg.so 
+julia_19 -> libgcc_s.so.1 libpthread.so.0 
+saw-tools -> libpthread.so.0 
+signal-desktop -> libffmpeg.so 
+zotero-beta -> libnspr4.so libnss3.so libnssutil3.so libsmime3.so 
+polar-bookshelf1 -> libffmpeg.so 
+glamoroustoolkit -> libcairo.so.2 
+libgcc.lib -> libgcc_s.so.1 
+libdrm -> libdrm.so.2 
+pencil -> libffmpeg.so 
+streamlink-twitch-gui-bin -> libffmpeg.so 
+xorg.libXfixes -> libXfixes.so.3 
+isabelle -> libffmpeg.so 
+xorg.libX11 -> libX11.so.6 
+xorg.libXdamage -> libXdamage.so.1 
+glibc_memusage -> libc.so.6 libdl.so.2 libm.so.6 libpthread.so.0 
+driversi686Linux.mesa -> libgbm.so.1 
+github-desktop -> libffmpeg.so 
+waveterm -> libffmpeg.so 
+cups.lib -> libcups.so.2 
+figma-linux -> libdbus-1.so.3 libexpat.so.1 libffmpeg.so libnspr4.so libnss3.so libnssutil3.so libsmime3.so 
+rubyPackages_3_1.pwntools -> libc.so.6 
+nwjs-ffmpeg-prebuilt -> libffmpeg.so 
+xorg.libXrandr -> libXrandr.so.2 
+react-native-debugger -> libffmpeg.so 
+julia-bin -> libgcc_s.so.1 
+rocketchat-desktop -> libffmpeg.so 
+expat -> libexpat.so.1 
+mullvad-vpn -> libffmpeg.so 
+xorg.libXext -> libXext.so.6 
+xorg.libxcb -> libxcb.so.1 
+xorg_sys_opengl -> libdrm.so.2 libexpat.so.1 libXext.so.6 
+tor-browser -> libnspr4.so libnss3.so libnssutil3.so libsmime3.so 
+mullvad-browser -> libnspr4.so libnss3.so libnssutil3.so libsmime3.so 
+nss -> libnss3.so libnssutil3.so libsmime3.so 
+nwjs-sdk -> libffmpeg.so 
+publii -> libffmpeg.so 
+pango -> libpango-1.0.so.0 
+ghdl-gcc -> libgcc_s.so.1 
+keeweb -> libffmpeg.so 
+python311Packages.kaleido -> libexpat.so.1 libnspr4.so libnss3.so libnssutil3.so libsmime3.so 
+glibc_multi -> libc.so.6 libdl.so.2 libm.so.6 libpthread.so.0 
+mihomo-party -> libffmpeg.so 
+glibc_memusage.debug -> libc.so.6 libdl.so.2 libm.so.6 libpthread.so.0 
+mesa -> libgbm.so.1 
+emuflight-configurator -> libffmpeg.so 
+thedesk -> libffmpeg.so 
+tidal-hifi -> libffmpeg.so 
+bloodhound -> libffmpeg.so 
+yesplaymusic -> libffmpeg.so 
+julia_19-bin -> libgcc_s.so.1 
+rubyPackages_3_4.pwntools -> libc.so.6 
+gtk3 -> libgdk-3.so.0 libgtk-3.so.0 
+cypress -> libffmpeg.so 
+mailspring -> libffmpeg.so 
+vivaldi-ffmpeg-codecs -> libffmpeg.so 
+electron_32-bin -> libffmpeg.so 
+rubyPackages.pwntools -> libc.so.6 
+libgcc.libgcc -> libgcc_s.so.1 
+gfn-electron -> libffmpeg.so 
+hakuneko -> libffmpeg.so 
+vscodium -> libffmpeg.so 
+python312Packages.kaleido -> libexpat.so.1 libnspr4.so libnss3.so libnssutil3.so libsmime3.so 
+glib -> libgio-2.0.so.0 libglib-2.0.so.0 libgobject-2.0.so.0 
