@@ -1,6 +1,7 @@
 { pkgs, lib, stdenv, copyDesktopItems,
-  python3, udev, node-gyp,
-  makeWrapper, nodejs_20, nodejs-14_x, electron_34, fetchFromGitHub
+  python3, udev,
+  makeWrapper, nodejs_20, nodejs-14_x, electron_34, fetchFromGitHub,
+  nvidiaPackage ? null
 }:
 
 let
@@ -16,32 +17,11 @@ let
   #   > npm ERR! request to https://registry.npmjs.org/node-ble failed: cache mode is 'only-if-cached' but no cached response is available.
   nodejs = nodejs-14_x;
 
-  rpath = lib.makeLibraryPath ( with pkgs; [
-    nss
-    gtk3
-    libappindicator-gtk3
-    libayatana-appindicator
-    glib
-    cairo
-    pango
-    gdk-pixbuf
-    atk
-    xorg.libX11
-    xorg.libXScrnSaver
-    xorg.libXcomposite
-    xorg.libXcursor
-    xorg.libXdamage
-    xorg.libXext
-    xorg.libXfixes
-    xorg.libXi
-    xorg.libXrandr
-    xorg.libXrender
-    cups
-    dbus
-    libsecret
-    systemd
-    xorg.libxshmfence
-  ]) + ":${stdenv.cc.cc.lib}/lib64";
+  runtime-dep-path = lib.makeBinPath ((with pkgs; [
+    which
+    gawk
+    procps
+  ]) ++ lib.optionals (nvidiaPackage != null) nvidiaPackage);
 
   baseNodePackages = (import ./node-composition.nix {
     inherit pkgs nodejs;
@@ -103,8 +83,7 @@ stdenv.mkDerivation rec {
     udev
 
     # For node-gyp
-    (python3.withPackages (p-pkgs: with p-pkgs; [ setuptools ]))
-    node-gyp
+    (python3.withPackages (p-pkgs: with p-pkgs; [ setuptools ])) 
   ];
 
   # These are installed in the right place via copyDesktopItems.
@@ -120,11 +99,13 @@ stdenv.mkDerivation rec {
   postPatch = ''
     substituteInPlace src/common/classes/TccPaths.ts \
       --replace "/etc/tcc" "/var/lib/tcc" \
-      --replace "/opt/tuxedo-control-center/resources/dist/tuxedo-control-center/data/service/tccd" "$out/bin/tccd"
+      --replace "/opt/tuxedo-control-center/resources/dist/tuxedo-control-center/data/service/tccd" "$out/bin/tccd" \
+      --replace "/opt/tuxedo-control-center/resources/dist/tuxedo-control-center/data/camera/" "$out/cameractrls/"
 
     for desktopFile in ${lib.concatStringsSep " " desktopItems}; do
       substituteInPlace $desktopFile \
-        --replace "/usr/bin/tuxedo-control-center" "$out/bin/tuxedo-control-center"
+        --replace "/opt/tuxedo-control-center/tuxedo-control-center" "$out/bin/tuxedo-control-center" \
+        --replace "/opt/tuxedo-control-center/resources/dist/tuxedo-control-center" $out
     done
    '';
 
@@ -169,8 +150,8 @@ stdenv.mkDerivation rec {
     runHook preInstall
 
     mkdir -p $out
-    mkdir -p $out/full_root
-    cp -R ./* $out/full_root
+    # mkdir -p $out/full_root
+    # cp -R ./* $out/full_root
     cp -R ./dist/tuxedo-control-center/* $out
 
     ln -s $src/node_modules $out/node_modules
@@ -179,16 +160,18 @@ stdenv.mkDerivation rec {
     # copy the whole thing since the system assumes it has access to all the `dist-data`
     # files.
     mkdir -p $out/data/dist-data
+    mkdir -p $out/cameractrls
     cp -R ./src/dist-data/* $out/data/dist-data/
+    cp -R ./src/cameractrls/* $out/cameractrls/
 
     # Install `tccd`
     mkdir -p $out/data/service
-    cp ./build/Release/TuxedoIOAPI.node $out/data/service/TuxedoIOAPI.node
     cp ./build/Release/TuxedoIOAPI.node $out/service-app/native-lib/TuxedoIOAPI.node
     makeWrapper ${nodejs_20}/bin/node $out/data/service/tccd \
                 --add-flags "$out/service-app/service-app/main.js" \
                 --prefix NODE_PATH : $out/data/service \
-                --prefix NODE_PATH : $out/node_modules
+                --prefix NODE_PATH : $out/node_modules \
+                --prefix PATH: ${runtime-dep-path}
     mkdir -p $out/bin
     ln -s $out/data/service/tccd $out/bin/tccd
 
@@ -223,16 +206,11 @@ stdenv.mkDerivation rec {
   dontPatchELF = true;
   # noAuditTmpdir = true;
 
-  postFixup = ''
-    # patchelf --set-interpreter "$(cat $NIX_CC/nix-support/dynamic-linker)" --set-rpath "${rpath}" "$out/data/service/TuxedoIOAPI.node"
-    # patchelf --set-interpreter "$(cat $NIX_CC/nix-support/dynamic-linker)" --set-rpath "${rpath}:$out/opt/tuxedo-control-center" "$out/opt/tuxedo-control-center/resources/dist/tuxedo-control-center/data/service/tccd"
-  '';
-
   meta = with lib; {
     description = "Fan and power management GUI for Tuxedo laptops";
     homepage = "https://github.com/tuxedocomputers/tuxedo-control-center/";
     license = licenses.gpl3Plus;
-    maintainers = [ maintainers.blitz ];
+    maintainers = [ "KalokaK" ];
     platforms = [ "x86_64-linux" ];
   };
 }

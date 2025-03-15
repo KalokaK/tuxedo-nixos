@@ -5,6 +5,9 @@ with lib;
 let
   cfg = config.hardware.tuxedo-control-center;
   tuxedo-drivers = config.boot.kernelPackages.tuxedo-drivers;
+  tuxedoPkg = if config.hardware.nvidia.enable then tuxedo-control-center else tuxedo-control-center.override {
+    nvidiaPackage = config.hardware.nvidia.package.bin;
+  };
 in
 {
   options.hardware.tuxedo-control-center = {
@@ -19,7 +22,7 @@ in
 
     package = mkOption {
       type = types.package;
-      default = tuxedo-control-center;
+      default = tuxedoPkg;
       defaultText = "pkgs.tuxedo-control-center";
       description = ''
         Which package to use for tuxedo-control-center.
@@ -28,6 +31,16 @@ in
   };
 
   config = mkIf cfg.enable {
+    assertions = [
+      {
+        assertion = !config.hardware.tuxedo-rs.enable;
+        message = "Tuxedo Control Center is incompatible tuxedo-rs";
+      }
+      {
+        assertion = !config.hardware.tuxedo-rs.tailor-gui.enable;
+        message = "Tuxedo Control Center is incompatible with tailor";
+      }
+    ];
     hardware.tuxedo-drivers.enable = true;
     boot.kernelModules = [
       # Tuxedo Control Center has a requirement on the minimum version
