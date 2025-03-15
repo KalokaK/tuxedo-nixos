@@ -8,6 +8,10 @@ let
   tuxedoPkg = if lib.elem "nvidia" config.services.xserver.videoDrivers then tuxedo-control-center else tuxedo-control-center.override {
     nvidiaPackage = config.hardware.nvidia.package.bin;
   };
+  runtime-deps = ((import ./runtime-dep-paths.nix) { 
+    inherit lib pkgs; 
+    nvidiaPackage = if lib.elem "nvidia" config.services.xserver.videoDrivers then config.hardware.nvidia.package.bin else null;
+  });
 in
 {
   options.hardware.tuxedo-control-center = {
@@ -71,7 +75,7 @@ in
     ];
 
     systemd.services.tccd = {
-      path = [ cfg.package ];
+      path = [ cfg.package ] ++ runtime-deps;
 
       description = "Tuxedo Control Center Service";
 

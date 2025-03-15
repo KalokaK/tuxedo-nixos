@@ -17,11 +17,7 @@ let
   #   > npm ERR! request to https://registry.npmjs.org/node-ble failed: cache mode is 'only-if-cached' but no cached response is available.
   nodejs = nodejs-14_x;
 
-  runtime-dep-path = lib.makeBinPath ((with pkgs; [
-    which
-    gawk
-    procps
-  ]) ++ lib.optionals (nvidiaPackage != null) nvidiaPackage);
+  runtime-dep-path = lib.makeBinPath ((import ../runtime-dep-paths.nix) { inherit pkgs lib nvidiaPackage; } );
 
   baseNodePackages = (import ./node-composition.nix {
     inherit pkgs nodejs;
