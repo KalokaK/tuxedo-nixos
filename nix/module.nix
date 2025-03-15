@@ -8,7 +8,7 @@ let
   tuxedoPkg = if lib.elem "nvidia" config.services.xserver.videoDrivers then tuxedo-control-center else tuxedo-control-center.override {
     nvidiaPackage = config.hardware.nvidia.package.bin;
   };
-  runtime-deps = ((import ./runtime-dep-paths.nix) { 
+  runtime-deps = ((import ./runtime-dep-pkgs.nix) { 
     inherit lib pkgs; 
     nvidiaPackage = if lib.elem "nvidia" config.services.xserver.videoDrivers then config.hardware.nvidia.package.bin else null;
   });
