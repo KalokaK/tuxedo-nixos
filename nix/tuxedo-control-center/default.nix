@@ -167,7 +167,7 @@ stdenv.mkDerivation rec {
                 --add-flags "$out/service-app/service-app/main.js" \
                 --prefix NODE_PATH : $out/data/service \
                 --prefix NODE_PATH : $out/node_modules \
-                --prefix PATH: ${runtime-dep-path}
+                --prefix PATH : ${runtime-dep-path}
     mkdir -p $out/bin
     ln -s $out/data/service/tccd $out/bin/tccd
 
