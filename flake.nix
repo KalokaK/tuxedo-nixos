@@ -2,9 +2,11 @@
   description = "System Configuration";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.11";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05";
 
-    old-nixpkgs = { url = "github:NixOS/nixpkgs/nixos-22.11"; };
+    old-nixpkgs = {
+      url = "github:NixOS/nixpkgs/nixos-22.11";
+    };
 
     flake-compat = {
       url = "github:edolstra/flake-compat";
@@ -12,9 +14,17 @@
     };
   };
 
-  outputs = { self, nixpkgs, old-nixpkgs, flake-compat }:
-    let system = "x86_64-linux";
-    in {
+  outputs =
+    {
+      self,
+      nixpkgs,
+      old-nixpkgs,
+      flake-compat,
+    }:
+    let
+      system = "x86_64-linux";
+    in
+    {
 
       packages.${system}.default =
         # Is there a simpler way to whitelist electron?
@@ -32,13 +42,17 @@
               # "openssl-1.1.1w"
             ];
           };
-        }).pkgs.callPackage ./nix/tuxedo-control-center {
-          nodejs-14_x = old-nixpkgs.legacyPackages.${system}.nodejs-14_x;
-        };
+        }).pkgs.callPackage
+          ./nix/tuxedo-control-center
+          {
+            nodejs-14_x = old-nixpkgs.legacyPackages.${system}.nodejs-14_x;
+          };
 
-      nixosModules.default = { config, pkgs, ... }: {
-        _module.args.tuxedo-control-center = self.packages.${system}.default;
-        imports = [ ./nix/module.nix ];
-      };
+      nixosModules.default =
+        { config, pkgs, ... }:
+        {
+          _module.args.tuxedo-control-center = self.packages.${system}.default;
+          imports = [ ./nix/module.nix ];
+        };
     };
 }
