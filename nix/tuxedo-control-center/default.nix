@@ -1,7 +1,16 @@
-{ pkgs, lib, stdenv, copyDesktopItems,
-  python3, udev,
-  makeWrapper, nodejs_20, nodejs-14_x, electron_34, fetchFromGitHub,
-  nvidiaPackage ? null
+{
+  pkgs,
+  lib,
+  stdenv,
+  copyDesktopItems,
+  python3,
+  udev,
+  makeWrapper,
+  nodejs_20,
+  nodejs-14_x,
+  electron_37,
+  fetchFromGitHub,
+  nvidiaPackage ? null,
 }:
 
 let
@@ -11,18 +20,22 @@ let
   version = "2.1.16";
 
   # keep in sync with update.sh!
-  # otherwise the format of package.json does not mach the format used by the 
+  # otherwise the format of package.json does not mach the format used by the
   # version used by nixpkgs, leading to errors such as:
   #   > npm ERR! code ENOTCACHED
   #   > npm ERR! request to https://registry.npmjs.org/node-ble failed: cache mode is 'only-if-cached' but no cached response is available.
   nodejs = nodejs-14_x;
 
-  runtime-dep-path = lib.makeBinPath ((import ../runtime-dep-pkgs.nix) { inherit pkgs lib nvidiaPackage; } );
+  runtime-dep-path = lib.makeBinPath (
+    (import ../runtime-dep-pkgs.nix) { inherit pkgs lib nvidiaPackage; }
+  );
 
-  baseNodePackages = (import ./node-composition.nix {
-    inherit pkgs nodejs;
-    inherit (stdenv.hostPlatform) system;
-  });
+  baseNodePackages = (
+    import ./node-composition.nix {
+      inherit pkgs nodejs;
+      inherit (stdenv.hostPlatform) system;
+    }
+  );
 
   nodePackages = baseNodePackages.package.override {
     src = fetchFromGitHub {
@@ -43,35 +56,30 @@ let
       patchShebangs ./node_modules/electron-builder/out/cli/cli.js
     '';
 
-    buildInputs = [
-      udev
-    ];
+    buildInputs = [ udev ];
 
     # Electron tries to download itself if this isn't set. We don't
     # like that in nix so let's prevent it.
     #
     # This means we have to provide our own electron binaries when
     # wrapping this program.
-    ELECTRON_SKIP_BINARY_DOWNLOAD=1;
+    ELECTRON_SKIP_BINARY_DOWNLOAD = 1;
 
     # Angular prompts for analytics, which in turn fails the build.
     #
     # We can disable analytics using false or empty string
     # (See https://github.com/angular/angular-cli/blob/1a39c5202a6fe159f8d7db85a1c186176240e437/packages/angular/cli/models/analytics.ts#L506)
-    NG_CLI_ANALYTICS="false";
+    NG_CLI_ANALYTICS = "false";
   };
 
 in
-
 stdenv.mkDerivation rec {
   pname = "tuxedo-control-center";
   inherit version;
 
   src = "${nodePackages}/lib/node_modules/tuxedo-control-center/";
 
-  nativeBuildInputs = [
-    copyDesktopItems
-  ];
+  nativeBuildInputs = [ copyDesktopItems ];
 
   buildInputs = [
     nodejs
@@ -79,7 +87,7 @@ stdenv.mkDerivation rec {
     udev
 
     # For node-gyp
-    (python3.withPackages (p-pkgs: with p-pkgs; [ setuptools ])) 
+    (python3.withPackages (p-pkgs: with p-pkgs; [ setuptools ]))
   ];
 
   # These are installed in the right place via copyDesktopItems.
@@ -103,7 +111,7 @@ stdenv.mkDerivation rec {
         --replace "/opt/tuxedo-control-center/tuxedo-control-center" "$out/bin/tuxedo-control-center" \
         --replace "/opt/tuxedo-control-center/resources/dist/tuxedo-control-center" $out
     done
-   '';
+  '';
 
   buildPhase = ''
     runHook preBuild

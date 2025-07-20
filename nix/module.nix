@@ -5,15 +5,21 @@ with lib;
 let
   cfg = config.hardware.tuxedo-control-center;
   tuxedo-drivers = config.boot.kernelPackages.tuxedo-drivers;
-  tuxedoPkg = if lib.elem "nvidia" config.services.xserver.videoDrivers then tuxedo-control-center.override {
-    nvidiaPackage = config.hardware.nvidia.package.bin;
-  } else tuxedo-control-center;
-  runtime-deps = ((import ./runtime-dep-pkgs.nix) { 
-    inherit lib pkgs; 
-    nvidiaPackage = if lib.elem "nvidia" config.services.xserver.videoDrivers then config.hardware.nvidia.package.bin else null;
+  tuxedoPkg = if lib.elem "nvidia" config.services.xserver.videoDrivers then
+    tuxedo-control-center.override {
+      nvidiaPackage = config.hardware.nvidia.package.bin;
+    }
+  else
+    tuxedo-control-center;
+  runtime-deps = ((import ./runtime-dep-pkgs.nix) {
+    inherit lib pkgs;
+    nvidiaPackage =
+      if lib.elem "nvidia" config.services.xserver.videoDrivers then
+        config.hardware.nvidia.package.bin
+      else
+        null;
   });
-in
-{
+in {
   options.hardware.tuxedo-control-center = {
     enable = mkEnableOption ''
       Tuxedo Control Center, the official fan and power management UI
@@ -49,14 +55,13 @@ in
     boot.kernelModules = [
       # Tuxedo Control Center has a requirement on the minimum version
       # of "tuxedo_io" kernel module.
-      # The exact requirement is currently in the 
+      # The exact requirement is currently in the
       # "src/native-lib/tuxedo_io_lib/tuxedo_io_ioctl.h" file of tuxedo-control-center
       # (i.e. the #define of MOD_API_MIN_VERSION).
-      # The respective version of the module itself is in the 
+      # The respective version of the module itself is in the
       # "src/tuxedo_io/tuxedo_io.c" file of tuxedo-drivers
       # (i.e. the #define of MODULE_VERSION).
-      (warnIf
-        ((builtins.compareVersions tuxedo-drivers.version "4.12.1") < 0)
+      (warnIf ((builtins.compareVersions tuxedo-drivers.version "4.12.1") < 0)
         "Tuxedo Control Center requires at least version 4.12.1 of tuxedo-drivers; current version is ${tuxedo-drivers.version}"
         "tuxedo_io")
     ];
@@ -95,9 +100,7 @@ in
 
       wantedBy = [ "sleep.target" ];
 
-      unitConfig = {
-        StopWhenUnneeded = "yes";
-      };
+      unitConfig = { StopWhenUnneeded = "yes"; };
 
       serviceConfig = {
         Type = "oneshot";
