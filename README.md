@@ -51,7 +51,7 @@ First enable the module in your `flake.nix`:
 ```nix
 {
   inputs = {
-	nixpkgs.url = "github:NixOS/nixpkgs/nixos-22.11";
+	nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
 
 	# ...
 
@@ -90,16 +90,6 @@ Then enable the module in `configuration.nix`:
 ```nix
   hardware.tuxedo-control-center.enable = true;
 ```
-
-## Troubleshooting
-
-The Tuxedo Control Center currently requires an outdated Electron
-version, which can break your build. There is an [upstream
-issue](https://github.com/tuxedocomputers/tuxedo-control-center/issues/148)
-that tracks this.
-
-Until this is fixed follow the instructions that the failing build
-gives you to workaround the issue.
 
 ## Updating
 

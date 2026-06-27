@@ -175,9 +175,8 @@ buildNpmPackage rec {
 
     # The service daemon (tccd) and the electron app resolve their runtime
     # dependencies (dbus-next, node-ble, usocket, ...) from node_modules via
-    # NODE_PATH. node2nix used to provide these as a separate store path that
-    # we could symlink; with buildNpmPackage node_modules lives in the build
-    # directory, so we copy it into $out instead (a symlink would dangle).
+    # NODE_PATH. With buildNpmPackage node_modules lives in the build
+    # directory, so we copy it into $out (a symlink would dangle).
     cp -R ./node_modules $out/node_modules
 
     mkdir -p $out/cameractrls
