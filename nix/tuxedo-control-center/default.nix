@@ -120,12 +120,33 @@ buildNpmPackage rec {
     node-gyp configure --release
     node-gyp rebuild --release # -> ./build/Release/TuxedoIOAPI.node
 
-    # 3. Service daemon. Upstream compiles with tsc then bundles with esbuild
-    #    and finally packages a node binary with @yao-pkg/pkg. We skip pkg and
-    #    run the bundle on the nix-provided node instead.
+    # 3. Service daemon.
+    #
+    # Upstream's `build-service-prod` does: tsc -> copy package.json ->
+    # esbuild bundle -> package a self-contained node binary with @yao-pkg/pkg.
+    #
+    # The raw tsc output cannot be run directly with node: the project compiles
+    # to ES modules (module: esnext) with extensionless relative imports, and
+    # the native binding (TuxedoIOAPI.js) mixes `export` with a CommonJS
+    # `require('./TuxedoIOAPI.node')`. esbuild resolves all of that into a
+    # single bundle, which is exactly what upstream runs through pkg.
+    #
+    # We reproduce the bundle (mirrors the `esbuild-service-prod` script) but
+    # skip pkg and run the bundle on the nix-provided node instead.
     tsc -p ./src/service-app
     cp ./src/package.json ./dist/tuxedo-control-center/service-app/package.json
     cp ./build/Release/TuxedoIOAPI.node ./dist/tuxedo-control-center/service-app/native-lib/
+
+    esbuild ./dist/tuxedo-control-center/service-app/service-app/main.js \
+      --tree-shaking=true \
+      --bundle \
+      --minify \
+      --drop:debugger \
+      --define:DEBUG=false \
+      --platform=node \
+      --loader:.node=copy \
+      --asset-names=[name] \
+      --outfile=./dist/tuxedo-control-center/service-app/service-app/esbuild.js
 
     # 4. Angular renderer (production).
     npm run build-ng-prod
@@ -142,6 +163,16 @@ buildNpmPackage rec {
     mkdir -p $out
     cp -R ./dist/tuxedo-control-center/* $out
 
+    # The electron app resolves some resources relative to its own location,
+    # e.g. the window icon at `data/dist-data/tuxedo-control-center_256.png`
+    # (see e-app/.../backendAPIs/browserWindowsAPI.js). The 3.0.6 `copy-files`
+    # script places the dist-data files directly under data/, and leaves only
+    # a stray `data/dist-data` file (the udev rule). Recreate data/dist-data as
+    # a proper directory holding the dist-data files so those lookups resolve.
+    rm -f $out/data/dist-data
+    mkdir -p $out/data/dist-data
+    cp -R ./src/dist-data/* $out/data/dist-data/
+
     # The service daemon (tccd) and the electron app resolve their runtime
     # dependencies (dbus-next, node-ble, usocket, ...) from node_modules via
     # NODE_PATH. node2nix used to provide these as a separate store path that
@@ -153,8 +184,12 @@ buildNpmPackage rec {
     cp -R ./src/cameractrls/* $out/cameractrls/
 
     # Install `tccd` (service daemon) wrapped around the nix node.
+    #
+    # We run the esbuild bundle (esbuild.js), not the raw tsc output: the
+    # bundle is self-contained and has the native TuxedoIOAPI.node copied
+    # beside it by esbuild's `--loader:.node=copy`.
     makeWrapper ${nodejs}/bin/node $out/bin/tccd \
-                --add-flags "$out/service-app/service-app/main.js" \
+                --add-flags "$out/service-app/service-app/esbuild.js" \
                 --prefix NODE_PATH : $out/service-app \
                 --prefix NODE_PATH : $out/node_modules \
                 --prefix PATH : ${runtime-dep-path}
@@ -170,7 +205,8 @@ buildNpmPackage rec {
                 --prefix NODE_PATH : $out/node_modules
 
     # NOTE: in 3.0.6 `npm run copy-files` places the dist-data files directly
-    # under data/ (not data/dist-data/ as in older versions).
+    # under data/ (not data/dist-data/ as in older versions), so the sources
+    # below read from $out/data/.
 
     # polkit policy
     mkdir -p $out/share/polkit-1/actions/
