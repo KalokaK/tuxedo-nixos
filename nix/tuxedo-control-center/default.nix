@@ -6,9 +6,9 @@
   python3,
   udev,
   makeWrapper,
-  nodejs_20,
-  nodejs-14_x,
-  electron_37,
+  nodejs_24,
+  electron_41,
+  buildNpmPackage,
   fetchFromGitHub,
   nvidiaPackage ? null,
 }:
@@ -17,78 +17,60 @@ let
   ## Update Instructions
   #
   # see ./README.md
-  version = "2.1.16";
+  version = "3.0.6";
 
-  # keep in sync with update.sh!
-  # otherwise the format of package.json does not mach the format used by the
-  # version used by nixpkgs, leading to errors such as:
-  #   > npm ERR! code ENOTCACHED
-  #   > npm ERR! request to https://registry.npmjs.org/node-ble failed: cache mode is 'only-if-cached' but no cached response is available.
-  nodejs = nodejs-14_x;
+  nodejs = nodejs_24;
+  electron = electron_41;
 
   runtime-dep-path = lib.makeBinPath (
     (import ../runtime-dep-pkgs.nix) { inherit pkgs lib nvidiaPackage; }
   );
 
-  baseNodePackages = (
-    import ./node-composition.nix {
-      inherit pkgs nodejs;
-      inherit (stdenv.hostPlatform) system;
-    }
-  );
-
-  nodePackages = baseNodePackages.package.override {
-    src = fetchFromGitHub {
-      owner = "tuxedocomputers";
-      repo = "tuxedo-control-center";
-      rev = "v${version}";
-      sha256 = "odGx1S6F5UVK73QjMI1np9Fx/QawRA+jnK/ZTzV6joI=";
-    };
-
-    preRebuild = ''
-      # the shebang of this file does not work as is in nix;
-      # usually this is taken care of with patch-shebangs.sh,
-      # but that only handles files marked as executable.
-      # thus mark the file as executable before the hook runs.
-      chmod +x ./node_modules/electron-builder/out/cli/cli.js
-      # and since this runs *after* patch-shebangs ran,
-      # manually execute patch-shebangs for this specific file.
-      patchShebangs ./node_modules/electron-builder/out/cli/cli.js
-    '';
-
-    buildInputs = [ udev ];
-
-    # Electron tries to download itself if this isn't set. We don't
-    # like that in nix so let's prevent it.
-    #
-    # This means we have to provide our own electron binaries when
-    # wrapping this program.
-    ELECTRON_SKIP_BINARY_DOWNLOAD = 1;
-
-    # Angular prompts for analytics, which in turn fails the build.
-    #
-    # We can disable analytics using false or empty string
-    # (See https://github.com/angular/angular-cli/blob/1a39c5202a6fe159f8d7db85a1c186176240e437/packages/angular/cli/models/analytics.ts#L506)
-    NG_CLI_ANALYTICS = "false";
-  };
-
 in
-stdenv.mkDerivation rec {
+buildNpmPackage rec {
   pname = "tuxedo-control-center";
   inherit version;
 
-  src = "${nodePackages}/lib/node_modules/tuxedo-control-center/";
+  src = fetchFromGitHub {
+    owner = "tuxedocomputers";
+    repo = "tuxedo-control-center";
+    rev = "v${version}";
+    hash = "sha256-wb4dj0YjfO9h+1H91dwZL8XSt3oaMe+wmoka4kyMZg8=";
+  };
 
-  nativeBuildInputs = [ copyDesktopItems ];
+  npmDepsHash = "sha256-QhyU983cEmtv1yXnFf5tJqx40lZp67nuwgfdc2m5kFY=";
 
-  buildInputs = [
-    nodejs
+  # The lockfile pins three dependencies (dbus-next, node-ble, usocket) to
+  # git revisions. buildNpmPackage needs to be told it's OK to use them, and
+  # npm needs a writable cache to install them.
+  forceGitDeps = true;
+  makeCacheWritable = true;
+
+  # Skip lifecycle scripts during dependency installation:
+  #   - `electron-builder install-app-deps` would try to rebuild native
+  #     modules against electron's headers (and reach the network).
+  #   - `patch-package` only patches @electron/rebuild, which we don't use
+  #     because we drive node-gyp ourselves.
+  # We rebuild the one native module (TuxedoIOAPI) by hand in buildPhase.
+  npmFlags = [ "--ignore-scripts" ];
+
+  inherit nodejs;
+
+  nativeBuildInputs = [
+    copyDesktopItems
     makeWrapper
-    udev
-
     # For node-gyp
     (python3.withPackages (p-pkgs: with p-pkgs; [ setuptools ]))
   ];
+
+  buildInputs = [ udev ];
+
+  # Electron tries to download itself if this isn't set. We provide our own
+  # electron binary when wrapping the program below.
+  ELECTRON_SKIP_BINARY_DOWNLOAD = 1;
+
+  # Angular prompts for analytics, which fails the build.
+  NG_CLI_ANALYTICS = "false";
 
   # These are installed in the right place via copyDesktopItems.
   desktopItems = [
@@ -96,56 +78,60 @@ stdenv.mkDerivation rec {
     "src/dist-data/tuxedo-control-center-tray.desktop"
   ];
 
-  # TCC by default writes its config to /etc/tcc, which is
-  # inconvenient. Change this to a more standard location.
-  #
-  # It also hardcodes binary paths.
+  # TCC by default writes its config to /etc/tcc, which is inconvenient.
+  # Change this to a more standard location. It also hardcodes binary paths.
   postPatch = ''
     substituteInPlace src/common/classes/TccPaths.ts \
-      --replace "/etc/tcc" "/var/lib/tcc" \
-      --replace "/opt/tuxedo-control-center/resources/dist/tuxedo-control-center/data/service/tccd" "$out/bin/tccd" \
-      --replace "/opt/tuxedo-control-center/resources/dist/tuxedo-control-center/data/camera/" "$out/cameractrls/"
+      --replace-fail "/opt/tuxedo-control-center/resources/dist/tuxedo-control-center/data/service/tccd" "$out/bin/tccd" \
+      --replace-fail "/opt/tuxedo-control-center/resources/dist/tuxedo-control-center/data/camera/cameractrls.py" "$out/cameractrls/cameractrls.py" \
+      --replace-fail "/opt/tuxedo-control-center/resources/dist/tuxedo-control-center/data/camera/v4l2_kernel_names.json" "$out/cameractrls/v4l2_kernel_names.json" \
+      --replace-fail "/etc/tcc" "/var/lib/tcc"
 
+    # The two desktop files don't share an identical set of hardcoded paths
+    # (e.g. only the main one has the resources/dist icon path), so use
+    # --replace-quiet to tolerate a missing pattern in either file.
     for desktopFile in ${lib.concatStringsSep " " desktopItems}; do
       substituteInPlace $desktopFile \
-        --replace "/opt/tuxedo-control-center/tuxedo-control-center" "$out/bin/tuxedo-control-center" \
-        --replace "/opt/tuxedo-control-center/resources/dist/tuxedo-control-center" $out
+        --replace-quiet "/opt/tuxedo-control-center/tuxedo-control-center" "$out/bin/tuxedo-control-center" \
+        --replace-quiet "/opt/tuxedo-control-center/resources/dist/tuxedo-control-center" $out
     done
   '';
+
+  # We run a custom build instead of `npm run build` so we can avoid the
+  # parts that don't play nicely with nix (electron download, @yao-pkg/pkg).
+  dontNpmBuild = true;
 
   buildPhase = ''
     runHook preBuild
 
-    # We already have `node_modules` in the current directory but we
-    # need it's binaries on `PATH` so we can use them!
     export PATH="./node_modules/.bin:$PATH"
-    ${pkgs.which}/bin/which npm
-    ${pkgs.which}/bin/which node
-    ${pkgs.which}/bin/which node-gyp
-    # exit 1
-    # ${pkgs.which}/bin/which node-gyp
-    # Prevent npm from checking for updates
     export NO_UPDATE_NOTIFIER=true
 
-    # The order of `npm` commands matches what `npm run build-prod` does but we split
-    # it out so we can customise the native builds in `npm run build-service`.
+    # Tell npm/node-gyp where node lives so it doesn't download headers.
+    export npm_config_nodedir=${nodejs}
+
     npm run clean
+
+    # 1. Electron main process (tsc -> dist/.../e-app)
     npm run build-electron
 
-    # We don't use `npm run build-service` here because it uses `pkg` which packages
-    # node binaries in a way unsuitable for nix. Instead we're doing it ourself.
+    # 2. Native module (TuxedoIOAPI.node). Upstream `build-native-prod` runs
+    #    `node-gyp configure --release && node-gyp rebuild --release`.
+    node-gyp configure --release
+    node-gyp rebuild --release # -> ./build/Release/TuxedoIOAPI.node
+
+    # 3. Service daemon. Upstream compiles with tsc then bundles with esbuild
+    #    and finally packages a node binary with @yao-pkg/pkg. We skip pkg and
+    #    run the bundle on the nix-provided node instead.
     tsc -p ./src/service-app
     cp ./src/package.json ./dist/tuxedo-control-center/service-app/package.json
+    cp ./build/Release/TuxedoIOAPI.node ./dist/tuxedo-control-center/service-app/native-lib/
 
-    # We need to tell npm where to find node or `node-gyp` will try to download it.
-    # This also _needs_ to be lowercase or `npm` won't detect it
-    export npm_config_nodedir=${nodejs}
-    # ${pkgs.which}/bin/which node-gyp
-    # ${pkgs.nodePackages.node-gyp}/bin/
-    node-gyp configure
-    node-gyp rebuild # Builds to ./build/Release/TuxedoIOAPI.node
-
+    # 4. Angular renderer (production).
     npm run build-ng-prod
+
+    # 5. Copy runtime data files into dist (mirrors `npm run copy-files`).
+    npm run copy-files
 
     runHook postBuild
   '';
@@ -154,61 +140,55 @@ stdenv.mkDerivation rec {
     runHook preInstall
 
     mkdir -p $out
-    # mkdir -p $out/full_root
-    # cp -R ./* $out/full_root
     cp -R ./dist/tuxedo-control-center/* $out
 
-    ln -s $src/node_modules $out/node_modules
+    # The service daemon (tccd) and the electron app resolve their runtime
+    # dependencies (dbus-next, node-ble, usocket, ...) from node_modules via
+    # NODE_PATH. node2nix used to provide these as a separate store path that
+    # we could symlink; with buildNpmPackage node_modules lives in the build
+    # directory, so we copy it into $out instead (a symlink would dangle).
+    cp -R ./node_modules $out/node_modules
 
-    # Parts of the code expect the icons to live under `data/dist-data`. Let's just
-    # copy the whole thing since the system assumes it has access to all the `dist-data`
-    # files.
-    mkdir -p $out/data/dist-data
     mkdir -p $out/cameractrls
-    cp -R ./src/dist-data/* $out/data/dist-data/
     cp -R ./src/cameractrls/* $out/cameractrls/
 
-    # Install `tccd`
-    mkdir -p $out/data/service
-    cp ./build/Release/TuxedoIOAPI.node $out/service-app/native-lib/TuxedoIOAPI.node
-    makeWrapper ${nodejs_20}/bin/node $out/data/service/tccd \
+    # Install `tccd` (service daemon) wrapped around the nix node.
+    makeWrapper ${nodejs}/bin/node $out/bin/tccd \
                 --add-flags "$out/service-app/service-app/main.js" \
-                --prefix NODE_PATH : $out/data/service \
+                --prefix NODE_PATH : $out/service-app \
                 --prefix NODE_PATH : $out/node_modules \
                 --prefix PATH : ${runtime-dep-path}
-    mkdir -p $out/bin
-    ln -s $out/data/service/tccd $out/bin/tccd
 
-    # Install `tuxedo-control-center`
+    # Install `tuxedo-control-center` (GUI) wrapped around electron.
     #
-    # We use `--no-tccd-version-check` because the app uses the electron context
-    # to determine the app version, but the electron context is wrong if electron
-    # is invoked directly on a JavaScript file.
-    #
-    # The fix is to run electron on a folder with a `package.json` but the `tuxedo-control-center`
-    # package.json expects all files to live under `dist/` and I'm not a huge fan of that
-    # structure so we just disable the check and call it a day.
-    makeWrapper ${electron_37}/bin/electron $out/bin/tuxedo-control-center \
+    # `--no-tccd-version-check` is used because the app uses the electron
+    # context to determine its version, which is wrong when electron is
+    # invoked directly on a JavaScript file.
+    makeWrapper ${electron}/bin/electron $out/bin/tuxedo-control-center \
                 --add-flags "$out/e-app/e-app/main.js" \
                 --add-flags "--no-tccd-version-check" \
                 --prefix NODE_PATH : $out/node_modules
 
+    # NOTE: in 3.0.6 `npm run copy-files` places the dist-data files directly
+    # under data/ (not data/dist-data/ as in older versions).
+
+    # polkit policy
     mkdir -p $out/share/polkit-1/actions/
-    cp $out/data/dist-data/com.tuxedocomputers.tccd.policy $out/share/polkit-1/actions/com.tuxedocomputers.tccd.policy
+    cp $out/data/com.tuxedocomputers.tccd.policy $out/share/polkit-1/actions/com.tuxedocomputers.tccd.policy
 
+    # dbus config
     mkdir -p $out/etc/dbus-1/system.d/
-    cp $out/data/dist-data/com.tuxedocomputers.tccd.conf $out/etc/dbus-1/system.d/com.tuxedocomputers.tccd.conf
+    cp $out/data/com.tuxedocomputers.tccd.conf $out/etc/dbus-1/system.d/com.tuxedocomputers.tccd.conf
 
-    # Put our icons in the right spot
+    # icon
     mkdir -p $out/share/icons/hicolor/scalable/apps/
-    cp $out/data/dist-data/tuxedo-control-center_256.svg \
+    cp $out/data/tuxedo-control-center_256.svg \
        $out/share/icons/hicolor/scalable/apps/tuxedo-control-center.svg
 
     runHook postInstall
   '';
 
   dontPatchELF = true;
-  # noAuditTmpdir = true;
 
   meta = with lib; {
     description = "Fan and power management GUI for Tuxedo laptops";
