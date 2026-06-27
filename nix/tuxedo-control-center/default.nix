@@ -95,6 +95,52 @@ buildNpmPackage rec {
         --replace-quiet "/opt/tuxedo-control-center/tuxedo-control-center" "$out/bin/tuxedo-control-center" \
         --replace-quiet "/opt/tuxedo-control-center/resources/dist/tuxedo-control-center" $out
     done
+
+    # Fix upstream's fragile single-instance guard (exitIfProcessExists).
+    #
+    # It reads the chromium SingletonLock symlink and exits whenever the
+    # embedded PID differs from the current process, and also when the lock
+    # is missing. But chromium never rewrites SingletonLock to the current
+    # PID (the embedded PID stays that of whichever instance first created
+    # it), so a stale lock from a dead process - or a not-yet-created lock -
+    # makes the app exit even though electron's own requestSingleInstanceLock
+    # (applicationLock, checked just above) already confirms we are the only
+    # instance. Upstream's autostart tray instance hides this; launching the
+    # GUI standalone hits it on every run after the first.
+    #
+    # Only exit if the lock's PID is an actually-running process; treat a
+    # missing lock or a dead PID as "no other instance".
+    substituteInPlace src/e-app/backendAPIs/initMain.ts \
+      --replace-fail \
+'        if (singletonLock) {
+            const singletonLockId: number = Number.parseInt(singletonLock.match(/(?<=-)(?!.*-).*/)[0], 10);
+
+            if (singletonLockId !== process.pid) {
+                console.log(`initMain: SingletonLock check failed ("''${singletonLockId}" !== "''${process.pid}")`);
+                app.exit(0);
+            }
+        } else {
+            console.log('"'"'initMain: SingletonLock check failed'"'"');
+            app.exit(0);
+        }' \
+'        if (singletonLock) {
+            const singletonLockId: number = Number.parseInt(singletonLock.match(/(?<=-)(?!.*-).*/)[0], 10);
+
+            if (singletonLockId !== process.pid) {
+                let otherInstanceAlive = false;
+                try {
+                    process.kill(singletonLockId, 0);
+                    otherInstanceAlive = true;
+                } catch (err: unknown) {
+                    otherInstanceAlive = false;
+                }
+
+                if (otherInstanceAlive) {
+                    console.log(`initMain: SingletonLock check failed ("''${singletonLockId}" !== "''${process.pid}")`);
+                    app.exit(0);
+                }
+            }
+        }'
   '';
 
   # We run a custom build instead of `npm run build` so we can avoid the
